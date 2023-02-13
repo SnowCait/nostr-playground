@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+    <head>
+      <meta charset="utf-8">
+      <title>Nostr playground</title>
+      <script type="module" src="main.js"></script>
+      <style>
+        main {
+          max-width: 800px;
+          margin: 0 auto;
+        }
+
+        section {
+          margin: 1em auto;
+        }
+
+        h2 {
+          font-size: 1.2em;
+        }
+
+        textarea {
+          width: 500px;
+          height: 150px;
+        }
+
+        ul {
+          list-style: none;
+          padding: 0;
+        }
+
+        .tips {
+          font-size: 0.8em;
+          color: gray;
+        }
+      </style>
+    </head>
+    <body>
+      <main>
+        <h1>Nostr playground</h1>
+
+        <section>
+          <form id="connect">
+            <label for="relay">URL: </label>
+            <input id="relay" type="text" size="50" placeholder="wss://">
+            <input type="submit" value="Connect">
+          </form>
+        </section>
+
+        <section>
+          <h2><a href="https://github.com/nostr-protocol/nips/blob/master/11.md">NIP-11</a> Relay Information Document</h2>
+          <textarea id="info" placeholder="NIP-11 Relay Information Document"></textarea>
+        </section>
+
+        <section>
+          <h2>Send</h2>
+          <form id="send">
+            <textarea id="json" placeholder="JSON"></textarea>
+            <div>
+              <input type="submit" value="Send">
+            </div>
+          </form>
+        </section>
+
+        <section>
+          <h2>Receive</h2>
+          <p class="tips">You can also see events at Chrome DevTools > Network > WS > Messages.</p>
+          <ul id="events"></ul>
+        </section>
+      </main>
+    </body>
+</html>
