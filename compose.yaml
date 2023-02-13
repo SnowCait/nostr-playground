@@ -1,0 +1,7 @@
+services:
+  web:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./docs:/usr/share/nginx/html:ro
