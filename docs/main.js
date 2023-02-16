@@ -1,3 +1,5 @@
+const secp = window.nobleSecp256k1;
+
 /** @type WebSocket */
 let ws;
 
@@ -79,11 +81,53 @@ const connect = host => {
   };
 };
 
+const generate = async (input) => {
+  const { kind, tags, content } = input;
+  if (kind === undefined || tags === undefined || content === undefined) {
+    return input;
+  }
+
+  /** @type {string} */
+  const privateKey = document.getElementById('private-key').value;
+  const publicKey = secp.utils.bytesToHex(secp.schnorr.getPublicKey(privateKey));
+  console.log('[private key]', privateKey);
+  console.log('[public key]', publicKey);
+  const createdAt = Math.round(Date.now() / 1000);
+  const json = JSON.stringify([
+    0,
+    publicKey,
+    createdAt,
+    kind,
+    tags,
+    content,
+  ]);
+  console.log('[json]', json);
+  const id = secp.utils.bytesToHex(await secp.utils.sha256(new TextEncoder().encode(json)));
+  console.log('[id]', id);
+  const sig = secp.utils.bytesToHex(await secp.schnorr.sign(id, privateKey));
+  console.log('[sig]', sig);
+  return {
+    id,
+    pubkey: publicKey,
+    created_at: createdAt,
+    kind,
+    tags,
+    content,
+    sig,
+  };
+};
+
 const send = async () => {
-  const json = document.getElementById('json').value;
-  console.log(json);
-  displayEvent(JSON.stringify(JSON.parse(json)));
-  ws.send(json);
+  const inputJson = document.getElementById('send-json').value;
+  console.log('[input json]', inputJson);
+  let command = JSON.parse(inputJson);
+  if (command[0] === 'EVENT') {
+    command[1] = await generate(command[1]);
+  }
+  const sendJson = JSON.stringify(command);
+  console.log('[send json]', sendJson);
+  displayEvent(sendJson);
+  ws.send(sendJson);
 };
 
 const run = async () => {
@@ -94,6 +138,59 @@ const run = async () => {
   console.log(host);
   await info(host);
   await connect(host);
+};
+
+const setJsonTemplate = type => {
+  let json = null;
+  switch (type) {
+    case 'EVENT':
+      json = JSON.stringify([
+        'EVENT',
+        {
+          id: '<generated>',
+          pubkey: '<generated>',
+          created_at: '<generated>',
+          kind: 1,
+          tags: [],
+          content: '',
+          sig: '<generated>',
+        },
+      ], null, 2);
+      break;
+    case 'REQ':
+      json = JSON.stringify([
+        'REQ',
+        Math.floor(Math.random() * 99999).toString(),
+        {},
+      ], null, 2);
+      break;
+    case 'CLOSE':
+      let subscriptionId = '';
+      try {
+        const previousJson = JSON.parse(document.getElementById('send-json').value);
+        if (previousJson[0] === 'REQ') {
+          subscriptionId = previousJson[1];
+        }
+      } catch (error) {
+        console.debug(error);
+      }
+      json = JSON.stringify([
+        'CLOSE',
+        subscriptionId,
+      ], null, 2);
+      break;
+  }
+
+  if (json !== null) {
+    document.getElementById('send-json').value = json;
+
+    const privateKeyInput = document.getElementById('private-key-input');
+    if (type === 'EVENT') {
+      privateKeyInput.classList.remove(['hidden']);
+    } else {
+      privateKeyInput.classList.add(['hidden']);
+    }
+  }
 };
 
 document.addEventListener('DOMContentLoaded', async event => {
@@ -108,7 +205,11 @@ document.addEventListener('DOMContentLoaded', async event => {
   document.getElementById('send').addEventListener('submit', async event => {
     console.log(event.type);
     event.preventDefault();
-
     await send();
+  });
+
+  document.getElementById('type').addEventListener('change', event => {
+    console.log(event.type, event.target.value);
+    setJsonTemplate(event.target.value);
   });
 });

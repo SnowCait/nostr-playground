@@ -3,6 +3,7 @@
     <head>
       <meta charset="utf-8">
       <title>Nostr playground</title>
+      <script type="module" src="noble-secp256k1.js"></script>
       <script type="module" src="main.js"></script>
       <style>
         main {
@@ -32,6 +33,10 @@
           font-size: 0.8em;
           color: gray;
         }
+
+        .hidden {
+          display: none;
+        }
       </style>
     </head>
     <body>
@@ -54,7 +59,21 @@
         <section>
           <h2>Send</h2>
           <form id="send">
-            <textarea id="json" placeholder="JSON"></textarea>
+            <div>
+              <select id="type">
+                <option>-</option>
+                <option>EVENT</option>
+                <option>REQ</option>
+                <option>CLOSE</option>
+              </select>
+            </div>
+            <div id="private-key-input" class="hidden">
+              <label for="private-key">Private key:</label>
+              <input id="private-key" type="text" placeholder="hex">
+            </div>
+            <div>
+              <textarea id="send-json" placeholder="JSON"></textarea>
+            </div>
             <div>
               <input type="submit" value="Send">
             </div>
