@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', async event => {
       warning.classList.add('hidden');
       document.getElementById('private-key-input').classList.add('hidden');
       nip07 = true;
-      localStorage.setItem('NIP-07', nip07);
+      sessionStorage.setItem('NIP-07', nip07);
     }
   });
 });
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async event => {
 window.addEventListener('load', async () => {
   console.log('load');
 
-  if (localStorage.getItem('NIP-07') === 'true' && window.nostr !== undefined) {
+  if (sessionStorage.getItem('NIP-07') === 'true' && window.nostr !== undefined) {
     console.log('NIP-07 is enabled')
     nip07 = true;
     document.getElementById('private-key-input').classList.add('hidden');
