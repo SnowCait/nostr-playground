@@ -2,6 +2,7 @@ const secp = window.nobleSecp256k1;
 
 /** @type WebSocket */
 let ws;
+let nip07 = false;
 
 const getHost = () => {
   const inputUrl = document.getElementById('relay').value;
@@ -122,7 +123,18 @@ const send = async () => {
   console.log('[input json]', inputJson);
   let command = JSON.parse(inputJson);
   if (command[0] === 'EVENT') {
-    command[1] = await generate(command[1]);
+    if (nip07) {
+      const event = command[1];
+      command[1] = await window.nostr.signEvent({
+        created_at: Math.round(Date.now() / 1000),
+        kind: event.kind,
+        tags: event.tags,
+        content: event.content,
+      });
+      console.log('[NIP-07]', command[1]);
+    } else {
+      command[1] = await generate(command[1]);
+    }
   }
   const sendJson = JSON.stringify(command);
   console.log('[send json]', sendJson);
@@ -185,7 +197,7 @@ const setJsonTemplate = type => {
     document.getElementById('send-json').value = json;
 
     const privateKeyInput = document.getElementById('private-key-input');
-    if (type === 'EVENT') {
+    if (type === 'EVENT' && !nip07) {
       privateKeyInput.classList.remove(['hidden']);
     } else {
       privateKeyInput.classList.add(['hidden']);
@@ -212,4 +224,28 @@ document.addEventListener('DOMContentLoaded', async event => {
     console.log(event.type, event.target.value);
     setJsonTemplate(event.target.value);
   });
+
+  document.getElementById('nip-07').addEventListener('click', event => {
+    console.log(event.type);
+
+    const warning = document.getElementById('nip-07-warning');
+    if (window.nostr === undefined) {
+      warning.classList.remove('hidden');
+    } else {
+      warning.classList.add('hidden');
+      document.getElementById('private-key-input').classList.add('hidden');
+      nip07 = true;
+      localStorage.setItem('NIP-07', nip07);
+    }
+  });
+});
+
+window.addEventListener('load', async () => {
+  console.log('load');
+
+  if (localStorage.getItem('NIP-07') === 'true' && window.nostr !== undefined) {
+    console.log('NIP-07 is enabled')
+    nip07 = true;
+    document.getElementById('private-key-input').classList.add('hidden');
+  }
 });
