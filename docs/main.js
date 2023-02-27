@@ -180,7 +180,9 @@ const setJsonTemplate = type => {
       json = JSON.stringify([
         'REQ',
         Math.floor(Math.random() * 99999).toString(),
-        {},
+        {
+          limit: 100,
+        },
       ], null, 2);
       break;
     case 'CLOSE':
