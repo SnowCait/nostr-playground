@@ -61,9 +61,14 @@ const displayEvent = text => {
 };
 
 const connect = host => {
-  const url = `wss://${host}`;
-  console.log(url);
-  ws = new WebSocket(url);
+  console.log(ws);
+  if (ws && ws.readyState === ws.OPEN) {
+    console.log(`Disconnect ${ws.url}`);
+    ws.close();
+  }
+
+  ws = new WebSocket(`wss://${host}`);
+  console.log(`Connect ${ws.url}`);
   ws.onerror = event => {
     console.error(event);
     displayEvent(`ERROR`);
