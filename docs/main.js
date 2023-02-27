@@ -76,10 +76,12 @@ const connect = host => {
   ws.onopen = event => {
     console.log(event);
     displayEvent(`OPEN ${ws.url}`);
+    document.getElementById('send-button').toggleAttribute('disabled', false);
   };
   ws.onclose = event => {
     console.log(event);
     displayEvent(`CLOSE code: ${event.code}, reason: ${event.reason}`);
+    document.getElementById('send-button').toggleAttribute('disabled', true);
   };
   ws.onmessage = event => {
     console.log(event.type, event.data);
