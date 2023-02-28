@@ -46,15 +46,59 @@ const info = async host => {
   document.getElementById('info').textContent = text;
 };
 
-const displayEvent = text => {
-  const code = document.createElement('code');
-  code.textContent = text;
-
-  const pre = document.createElement('pre');
-  pre.append(code);
-
+const displayEvent = (/** @type {string} */ text) => {
   const item = document.createElement('li');
-  item.append(pre);
+  const previewPre = document.createElement('pre');
+  const previewCode = document.createElement('code');
+  if (text.startsWith('[')) {
+    const message = JSON.parse(text);
+    const [ type, subscriptionId, event ] = message;
+    if (event !== undefined) {
+      previewCode.textContent = JSON.stringify([
+        type,
+        subscriptionId,
+        {
+          kind: event.kind,
+          content: event.content,
+          tags: event.tags,
+        },
+      ]);
+      previewPre.append(previewCode);
+      previewPre.addEventListener('click', () => {
+        console.log(event.id);
+        const target = document.getElementById(event.id);
+        console.log(target);
+        if (target.classList.contains('hidden')) {
+          target.classList.remove('hidden');
+        } else {
+          target.classList.add('hidden');
+        }
+      });
+      item.append(previewPre);
+
+      const more = document.createElement('span');
+      more.textContent = 'more...';
+      more.classList.add('more');
+      previewPre.append(more);
+
+      const jsonCode = document.createElement('code');
+      jsonCode.textContent = JSON.stringify(message, null, 2);
+      const jsonPre = document.createElement('pre');
+      jsonPre.id = event.id;
+      jsonPre.classList.add('json');
+      jsonPre.classList.add('hidden');
+      jsonPre.append(jsonCode);
+      item.append(jsonPre);
+    } else {
+      previewCode.textContent = text;
+      previewPre.append(previewCode);
+      item.append(previewPre);
+    }
+  } else {
+    previewCode.textContent = text;
+    previewPre.append(previewCode);
+    item.append(previewPre);
+  }
 
   const list = document.getElementById('events');
   list.prepend(item);
