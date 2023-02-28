@@ -2,6 +2,8 @@
 
 JSON-based web client written in plain JavaScript.
 
+https://snowcait.github.io/nostr-playground/
+
 ## Depends on
 
 - [@noble/secp256k1](https://github.com/paulmillr/noble-secp256k1)
