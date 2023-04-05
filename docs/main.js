@@ -4,11 +4,11 @@ const secp = window.nobleSecp256k1;
 let ws;
 let nip07 = false;
 
-const getHost = () => {
+const getURL = () => {
   const inputUrl = document.getElementById('relay').value;
 
   try {
-    return new URL(inputUrl).host;
+    return new URL(inputUrl);
   } catch (error) {
     if (error instanceof TypeError) {
       console.log('Invalid URL');
@@ -19,13 +19,13 @@ const getHost = () => {
   }
 };
 
-const info = async host => {
-  const url = `https://${host}`;
-  console.log(url);
+const info = async (/** @type {URL} */ url) => {
+  const httpUrl = url.href.replace('wss://', 'https://').replace('ws://', 'http://');
+  console.log(httpUrl);
 
   let text = 'NIP-11 is not supported.';
   try {
-    const response = await fetch(url, {
+    const response = await fetch(httpUrl, {
       method: 'GET',
       headers: {
         'Accept': 'application/nostr+json',
@@ -104,14 +104,14 @@ const displayEvent = (/** @type {string} */ text) => {
   list.prepend(item);
 };
 
-const connect = host => {
+const connect = (/** @type {URL} */ url) => {
   console.log(ws);
   if (ws && ws.readyState === ws.OPEN) {
     console.log(`Disconnect ${ws.url}`);
     ws.close();
   }
 
-  ws = new WebSocket(`wss://${host}`);
+  ws = new WebSocket(url.href);
   console.log(`Connect ${ws.url}`);
   ws.onerror = event => {
     console.error(event);
@@ -194,13 +194,13 @@ const send = async () => {
 };
 
 const run = async () => {
-  const host = getHost();
-  if (host === null) {
+  const url = getURL();
+  if (url === null) {
     return;
   }
-  console.log(host);
-  await info(host);
-  await connect(host);
+  console.log(url);
+  await info(url);
+  await connect(url);
 };
 
 const setJsonTemplate = type => {
