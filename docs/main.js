@@ -173,7 +173,7 @@ const send = async () => {
   const inputJson = document.getElementById('send-json').value;
   console.log('[input json]', inputJson);
   let command = JSON.parse(inputJson);
-  if (command[0] === 'EVENT') {
+  if (['AUTH', 'EVENT'].includes(command[0])) {
     if (nip07) {
       const event = command[1];
       command[1] = await window.nostr.signEvent({
@@ -206,6 +206,24 @@ const run = async () => {
 const setJsonTemplate = type => {
   let json = null;
   switch (type) {
+    case 'AUTH': {
+      json = JSON.stringify([
+        'AUTH',
+        {
+          id: '<generated>',
+          pubkey: '<generated>',
+          created_at: '<generated>',
+          kind: 22242,
+          tags: [
+            ['relay', getURL() ?? ''],
+            ['challenge', '']
+          ],
+          content: '',
+          sig: '<generated>',
+        },
+      ], null, 2);
+      break;
+    }
     case 'EVENT':
       json = JSON.stringify([
         'EVENT',
@@ -250,7 +268,7 @@ const setJsonTemplate = type => {
     document.getElementById('send-json').value = json;
 
     const privateKeyInput = document.getElementById('private-key-input');
-    if (type === 'EVENT' && !nip07) {
+    if (['AUTH', 'EVENT'].includes(type) && !nip07) {
       privateKeyInput.classList.remove(['hidden']);
     } else {
       privateKeyInput.classList.add(['hidden']);
