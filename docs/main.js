@@ -134,7 +134,7 @@ const connect = (/** @type {URL} */ url) => {
 };
 
 const generate = async (input) => {
-  const { kind, tags, content } = input;
+  const { kind, tags, content, created_at } = input;
   if (kind === undefined || tags === undefined || content === undefined) {
     return input;
   }
@@ -144,7 +144,7 @@ const generate = async (input) => {
   const publicKey = secp.utils.bytesToHex(secp.schnorr.getPublicKey(privateKey));
   console.log('[private key]', privateKey);
   console.log('[public key]', publicKey);
-  const createdAt = Math.round(Date.now() / 1000);
+  const createdAt = created_at ? created_at : Math.round(Date.now() / 1000);
   const json = JSON.stringify([
     0,
     publicKey,
@@ -177,7 +177,7 @@ const send = async () => {
     if (nip07) {
       const event = command[1];
       command[1] = await window.nostr.signEvent({
-        created_at: Math.round(Date.now() / 1000),
+        created_at: event.created_at ? event.created_at : Math.round(Date.now() / 1000),
         kind: event.kind,
         tags: event.tags,
         content: event.content,
