@@ -144,15 +144,8 @@ const generate = async (input) => {
   const publicKey = secp.utils.bytesToHex(secp.schnorr.getPublicKey(privateKey));
   console.log('[private key]', privateKey);
   console.log('[public key]', publicKey);
-  const createdAt = created_at ? created_at : Math.round(Date.now() / 1000);
-  const json = JSON.stringify([
-    0,
-    publicKey,
-    createdAt,
-    kind,
-    tags,
-    content,
-  ]);
+  const createdAt = Number.isInteger(created_at) ? created_at : Math.round(Date.now() / 1000);
+  const json = JSON.stringify([0, publicKey, createdAt, kind, tags, content]);
   console.log('[json]', json);
   const id = secp.utils.bytesToHex(await secp.utils.sha256(new TextEncoder().encode(json)));
   console.log('[id]', id);
@@ -177,7 +170,9 @@ const send = async () => {
     if (nip07) {
       const event = command[1];
       command[1] = await window.nostr.signEvent({
-        created_at: event.created_at ? event.created_at : Math.round(Date.now() / 1000),
+        created_at: Number.isInteger(event.created_at)
+          ? event.created_at
+          : Math.round(Date.now() / 1000),
         kind: event.kind,
         tags: event.tags,
         content: event.content,
